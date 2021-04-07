@@ -1,20 +1,23 @@
 from flask import Flask, render_template, redirect, url_for, session
 from flask.globals import request
 from flask.json import jsonify
-from flask_socketio import SocketIO, join_room, leave_room, namespace, send, emit
+from flask_socketio import SocketIO, join_room, leave_room, emit
 from dotenv import load_dotenv
 import os
 from enum import Enum
 import datetime
-import hashlib
 import re
 from random import randint
+from argon2 import PasswordHasher
+from jinja2.utils import escape
 
 load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
 sio = SocketIO(app)
+
+ROOMS = {}
 
 #####################
 #                   #
@@ -37,7 +40,7 @@ class UserMessage:
     def __init__(self, user, message) -> None:
         self._type = MessageType.USER.value
         self._user = user
-        self._message = message
+        self._message = escape(message)
         self._timestamp = datetime.datetime.timestamp(datetime.datetime.now())
     
     def get(self):
@@ -92,7 +95,7 @@ def index():
 def panel():
     if not 'uid' in session:
         return redirect(url_for("index"))
-    return render_template("panel.html")
+    return render_template("panel.html", user=session['uid'])
 
 @app.route('/api/login', methods=['POST'])
 def login():
@@ -117,6 +120,7 @@ def login():
     username += "#"+str(randint(1111, 9999))
 
     session['uid'] = username
+    session['roomid'] = None
     
     return jsonify({'success': True, 'message': f"Logged in as {username}"})
             
@@ -129,16 +133,146 @@ def login():
 
 @sio.on('connect')
 def test_connect():
-    emit('msg_receive', ClientMessage("Welcome to the DeepRiver chat service!").get(), namespace='/panel')
-    print(f"User {str(hashlib.md5(session['uid'].encode()).hexdigest())[0:10]} connected to the main lobby")
+    emit('msg_receive', ClientMessage("Welcome to the deepriver platform!").get())
+    emit('msg_receive', ClientMessage("Welcome to the deepriver platform!!!!").get(), room=None)
+    public_rooms = []
+    for room_name, room_content in ROOMS.items():
+        if ROOMS[room_name]['config']['public'] == True:
+            public_rooms.append({'name': room_name, 'locked': False if room_content['password'] == None else True})
+    emit('update_server_data', {'room_name': 'root', 'users': [], 'servers': public_rooms})
+    return
 
 @sio.on('disconnect')
 def test_disconnect():
-    print(f"User {str(hashlib.md5(session['uid'].encode()).hexdigest())[0:10]} disconnected briefly, reconnecting...?")
+    if session['roomid'] == None:
+        return
+    
+    ROOMS[session['roomid']]['users'].remove(session['uid'])
+    leave_room(session['roomid'])
 
-@sio.on('motd')
-def socket_motd(tmp):
-    emit('msg_receive', ClientMessage("Welcome to the deepriver platform!").get())
+    if len(ROOMS[session['roomid']]['users']) == 0:
+        del(ROOMS[session['roomid']])
+    else:
+        emit('msg_receive', ServerMessage(f"User {session['uid']} left the room.").get(), room=session['roomid'])
+    session['roomid'] = None
+    return
+    
+
+@sio.on('msg_send')
+def socket_msg_send(message):
+    if not message or len(message) < 1:
+        return
+    if not message[0] == '/':
+        if session['roomid'] == None:
+            emit('msg_receive', ClientMessage("You are not connected to any room!").get())
+            return
+        emit('msg_receive', UserMessage(session['uid'], message).get(), room=session['roomid'])
+        return
+    
+    if re.match(r'^/room create [a-zA-Z0-9\-\_]', message):
+        splitted = message.split(' ')
+        room_name = splitted[2]
+        if len(splitted) == 4:
+            room_password = PasswordHasher().hash(splitted[3])
+        else:
+            room_password = None
+
+        if room_name in ROOMS:
+            emit('msg_receive', ClientMessage("Room with such name already exists!").get())
+            return
+        
+        if not session['roomid'] == None:
+            emit('msg_receive', ClientMessage("You are already in a room!").get())
+            return
+        
+        ROOMS.update({
+            room_name: {'password': room_password, 'users': [session['uid']], 'config':{
+                'public': False
+            }}
+        })
+        session['roomid'] = room_name
+
+        join_room(room_name)
+        emit('update_server_data', {'room_name': room_name, 'users': ROOMS[room_name]['users'], 'servers': []})
+        emit('msg_receive', ServerMessage(f"User {session['uid']} joined the room.").get(), room=room_name)
+        return
+    
+    if re.match(r'^/room join [a-zA-Z0-9\-\_]', message):
+        splitted = message.split(' ')
+        room_name = splitted[2]
+        if len(splitted) == 4:
+            room_password = splitted[3]
+        else:
+            room_password = None
+
+        if not room_name in ROOMS:
+            emit('msg_receive', ClientMessage("Room with this name does not exist!").get())
+            return
+        
+        if session['uid'] in ROOMS[room_name]['users']:
+            emit('msg_receive', ClientMessage("You are connected to this room!").get())
+            return
+        
+        if not session['roomid'] == None:
+            emit('msg_receive', ClientMessage("You are already in a room!").get())
+            return
+
+        if not ROOMS[room_name]['password'] == None and room_password == None:
+            emit('msg_receive', ClientMessage("This room requires a password!").get())
+            return
+        
+        if not ROOMS[room_name]['password'] == None:
+            try:
+                PasswordHasher().verify(ROOMS[room_name]['password'], room_password)
+            except:
+                emit('msg_receive', ClientMessage("Invalid password!").get())
+                return
+
+        ROOMS[room_name]['users'].append(session['uid'])
+        join_room(room_name)
+        session['roomid'] = room_name
+        emit('msg_receive', ServerMessage(f"User {session['uid']} joined the room.").get(), room=room_name)
+        emit('update_server_data', {'room_name': room_name, 'users': ROOMS[room_name]['users'], 'servers': []}, room=room_name)
+        return
+
+    if re.match(r'^/room leave', message):
+        if session['roomid'] == None:
+            emit('msg_receive', ClientMessage("You are not connected to any room!").get())
+            return
+        
+        ROOMS[session['roomid']]['users'].remove(session['uid'])
+        
+        
+        leave_room(session['roomid'])
+        emit('msg_receive', ClientMessage("Disconnected.").get())
+
+        if len(ROOMS[session['roomid']]['users']) == 0:
+            del(ROOMS[session['roomid']])
+        else:
+            emit('update_server_data', {'room_name': session['roomid'], 'users': ROOMS[session['roomid']]['users'], 'servers': []}, room=session['roomid'])
+            emit('msg_receive', ServerMessage(f"User {session['uid']} left the room.").get(), room=session['roomid'])
+        session['roomid'] = None
+
+        public_rooms = []
+        for room_name, room_content in ROOMS.items():
+            if ROOMS[room_name]['config']['public'] == True:
+                public_rooms.append({'name': room_name, 'locked': False if room_content['password'] == None else True})
+        emit('update_server_data', {'room_name': 'root', 'users': [], 'servers': public_rooms})
+        return
+
+    if re.match(r'^/public', message):
+        if session['roomid'] == None:
+            emit('msg_receive', ClientMessage("You are not connected to any room!").get())
+            return
+        
+        ROOMS[session['roomid']]['config']['public'] = not ROOMS[session['roomid']]['config']['public']
+        emit('msg_receive', ServerMessage(f"Public mode set to {ROOMS[session['roomid']]['config']['public']} by {session['uid']}", ServerMessageType.WARNING).get(), room=session['roomid'])
+        return
+
+    emit('msg_receive', ClientMessage(f"Invalid command: {message}").get())
+    
+
+    
 
 if __name__ == '__main__':
     sio.run(app, debug=True)

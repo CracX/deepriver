@@ -154,6 +154,8 @@ body{
 }
 
 #cb-server{
+    overflow-y: scroll;
+
     width: 100%;
     height: 50%;
 
@@ -190,6 +192,7 @@ body{
 #cb-chat{
     height: 95%;
     padding: 15px;
+    overflow-y: scroll;
 
     p{
         padding: 2px;
