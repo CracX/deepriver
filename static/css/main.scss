@@ -26,7 +26,7 @@ body{
     background-color: #EEEEEE;
 }
 
-.wrapper-login{
+.wrapper{
     width: 100%;
     height: 100%;
     display: flex;
@@ -104,4 +104,141 @@ body{
     text-align: center;
 }
 
+/* ==================================== */
+/*                PANEL                 */
+/* ==================================== */
 
+#chat-box{
+    width: 95%;
+    height: 95%;
+    display: flex;
+    gap: 10px;
+}
+
+#cb-left{
+    width: 30%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#cb-right{
+    width: 70%;
+    display: flex;
+    flex-direction: column;
+
+    background: rgba( 238, 238, 238, 0.25 );
+    box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
+    backdrop-filter: blur( 4px );
+    -webkit-backdrop-filter: blur( 4px );
+    border-radius: 10px;
+    border: 1px solid rgba( 255, 255, 255, 0.18 );
+}
+
+#cb-motd{
+    width: 100%;
+    height: 50%;
+
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba( 238, 238, 238, 0.25 );
+    box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
+    backdrop-filter: blur( 4px );
+    -webkit-backdrop-filter: blur( 4px );
+    border-radius: 10px;
+    border: 1px solid rgba( 255, 255, 255, 0.18 );
+
+}
+
+#cb-server{
+    width: 100%;
+    height: 50%;
+
+    background: rgba( 238, 238, 238, 0.25 );
+    box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
+    backdrop-filter: blur( 4px );
+    -webkit-backdrop-filter: blur( 4px );
+    border-radius: 10px;
+    border: 1px solid rgba( 255, 255, 255, 0.18 );
+
+    padding: 20px 0 0 30px;
+    p{
+        font-size: 25px;
+        font-weight: bold;
+    }
+
+    ul{
+        margin-left: 40px;
+        list-style: none;
+        li{
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            img{
+                width: 20px;
+                height: 30px;
+                margin-right: 10px;
+            }
+        }
+    }
+
+}
+
+#cb-chat{
+    height: 95%;
+    padding: 15px;
+
+    p{
+        padding: 2px;
+    }
+}
+
+.msg-client{
+    color: grey;
+    font-style: italic;
+}
+
+.msg-server{
+    font-weight: bolder;
+}
+
+.msg-server.success{
+    background-color: #00754B;
+    color: #F2ECFF;
+}
+
+.msg-server.warning{
+    background-color: #cb3b3b;
+    color: #F2ECFF;
+}
+
+.msg-user{
+    span{
+        font-weight: bolder;
+    }
+}
+
+#cb-input{
+    height: 5%;
+    display: flex;
+    input{
+        width: 90%;
+        outline: none;
+        border: none;
+        border-radius: 5px;
+        background-color: darken(#dee1ec, 10%);
+        padding: 0 10px 0 10px;
+        font-size: 15px;
+    }
+    button{
+        width: 10%;
+        cursor: pointer;
+        border: none;
+        background-color: #474747;
+        color: white;
+        outline: none;
+    }
+}

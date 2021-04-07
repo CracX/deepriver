@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Panel // DeepRiver</title>
+        <link rel="stylesheet" href="/static/css/main.css?v=55">
+    </head>
+    <body>
+        <div class="wrapper">
+            <div id="chat-box">
+                <div id="cb-left">
+                    <div id="cb-motd">
+                        <h1>Welcome!</h1>
+                    </div>
+                    <div id="cb-server">
+                        <p id="cbs-root">/root</p>
+                        <ul>
+                            <li class="cbs-server" data-type="server" data-id="123"><img src="/static/icons/server.png"> Server1</li>
+                            <li class="cbs-server" data-type="server-locked" data-id="456"><img src="/static/icons/server_locked.png"> Server2</li>
+                            <li class="cbs-user" data-type="user"><img src="/static/icons/user.png"> user1</li>
+                        </ul>
+                    </div>
+                </div>
+                <div id="cb-right">
+                    <div id="cb-chat">
+                        <p class="msg-client">This is a client message</p>
+                        <p class="msg-server">this is a default server message</p>
+                        <p class="msg-server success">This is a server success message</p>
+                        <p class="msg-server warning">This is a server warning message</p>
+                        <p class="msg-user"><span>CracX:</span> This is a simple chat message</p>
+                    </div>
+                    <div id="cb-input">
+                        <input type="text" name="i-chat-message" id="i-chat-message">
+                        <button id="btn-send">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="/static/js/jquery-3.6.0.min.js"></script>
+        <script src="/static/js/socket.io.js"></script>
+        <script src="/static/js/panel.js?v=55"></script>
+    </body>
+</html>

@@ -91,7 +91,7 @@ def index():
 @app.route('/panel')
 def panel():
     if not 'uid' in session:
-        return redirect(url_for("login"))
+        return redirect(url_for("index"))
     return render_template("panel.html")
 
 @app.route('/api/login', methods=['POST'])
@@ -128,13 +128,17 @@ def login():
 #####################
 
 @sio.on('connect')
-def user_connected():
+def test_connect():
     emit('msg_receive', ClientMessage("Welcome to the DeepRiver chat service!").get(), namespace='/panel')
     print(f"User {str(hashlib.md5(session['uid'].encode()).hexdigest())[0:10]} connected to the main lobby")
 
 @sio.on('disconnect')
-def user_disconnected():
-    pass
+def test_disconnect():
+    print(f"User {str(hashlib.md5(session['uid'].encode()).hexdigest())[0:10]} disconnected briefly, reconnecting...?")
+
+@sio.on('motd')
+def socket_motd(tmp):
+    emit('msg_receive', ClientMessage("Welcome to the deepriver platform!").get())
 
 if __name__ == '__main__':
     sio.run(app, debug=True)
