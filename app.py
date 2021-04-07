@@ -1,9 +1,14 @@
 from logging import debug
 from flask import Flask, render_template, redirect, url_for
 from flask_socketio import SocketIO
+from dotenv import load_dotenv
+import os
+load_dotenv()
+
+
 
 app = Flask(__name__)
-app.secret_key = "asdj9a09skd9s09dja0sojda0ps9dja9sdoa"
+app.secret_key = os.getenv('SECRET_KEY')
 sio = SocketIO(app)
 
 #####################
@@ -19,6 +24,13 @@ def index():
 @app.route('/panel')
 def panel():
     return render_template("panel.html")
+
+#####################
+#                   #
+#      SOCKETS      #
+#                   #
+#####################
+
 
 
 if __name__ == '__main__':
