@@ -1,0 +1,107 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+@font-face {
+    font-family: 'Montserrat';
+    src: url('/static/fonts/Montserrat-Regular.woff2') format('woff2'),
+        url('/static/fonts/Montserrat-Regular.woff') format('woff'),
+        url('/static/fonts/Montserrat-Regular.otf') format('otf'),
+        url('/static/fonts/Montserrat-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+html, body{
+    width: 100%;
+    height: 100%;
+}
+
+body{
+    font-family: 'Montserrat';
+    background-color: #EEEEEE;
+}
+
+.wrapper-login{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+#login-box{
+    background: rgba( 238, 238, 238, 0.25 );
+    box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
+    backdrop-filter: blur( 4px );
+    -webkit-backdrop-filter: blur( 4px );
+    border-radius: 10px;
+    border: 1px solid rgba( 255, 255, 255, 0.18 );
+    padding: 30px;
+
+    h2{
+        text-align: center;
+        margin-bottom: 30px;
+    }
+}
+
+#lb-btn{
+    text-align: right;
+    button{
+        border: none;
+        right: 30px;
+        padding: 10px;
+        background-color: #A8B3BC;
+        cursor: pointer;
+        transition: background-color ease-in-out .2s;
+    }
+
+    button:hover{
+        background-color: lighten(#A8B3BC, 10%);
+    }
+}
+
+.lb-input-group{
+    margin-bottom: 10px;
+    input{
+        margin-top: 10px;
+        border: none;
+        width: 100%;
+        height: 35px;
+        background-color: darken(#EEEEEE, 10%);
+        border-radius: 5px;
+        outline: none;
+        padding: 0 10px 0 10px;
+        font-size: 17px;
+    }
+}
+
+@keyframes login_errorbox_open {
+    100% {height: auto; padding: 20px; opacity: 1;}
+}
+
+@keyframes login_errorbox_close {
+    100% {height: 0px; padding: 0px; opacity: 0;}
+}
+
+#lb-hiperlinks{
+    margin-top: 30px;
+    text-align: center;
+}
+
+#login-error-box{
+    margin-top: 10px;
+    padding: 0px;
+    opacity: 0;
+    background-color: #FFD9C3;
+    border: 2px solid darken(#FFD9C3, 20%);
+    width: 300px;
+    text-align: center;
+}
+
+

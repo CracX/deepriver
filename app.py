@@ -1,4 +1,3 @@
-from crypt import methods
 from flask import Flask, render_template, redirect, url_for, session
 from flask.globals import request
 from flask.json import jsonify
@@ -91,6 +90,8 @@ def index():
 
 @app.route('/panel')
 def panel():
+    if not 'uid' in session:
+        return redirect(url_for("login"))
     return render_template("panel.html")
 
 @app.route('/api/login', methods=['POST'])
@@ -108,7 +109,7 @@ def login():
             return jsonify({'success': False, 'message': f"Missing field '{field}'"}), 404
     
     username = data['username']
-    username_check = username and len(username) >= 3 and len(username) <= 15 and re.match('[a-zA-Z0-9\-\_]', username)
+    username_check = username and len(username) >= 3 and len(username) <= 15 and re.match(r'[a-zA-Z0-9\-\_]', username)
 
     if not username_check:
         return jsonify({'success': False, 'message': "Invalid username. Please, only use symbols 'a-z A-Z 0-9 - _' and no longer than 15 characters, no shorter than 3"}), 404
@@ -117,7 +118,7 @@ def login():
 
     session['uid'] = username
     
-    return jsonify({'success': True, 'message': f"Logged in as {username}"}), 200
+    return jsonify({'success': True, 'message': f"Logged in as {username}"})
             
 
 #####################
