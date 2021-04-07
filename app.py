@@ -134,7 +134,6 @@ def login():
 @sio.on('connect')
 def test_connect():
     emit('msg_receive', ClientMessage("Welcome to the deepriver platform!").get())
-    emit('msg_receive', ClientMessage("Welcome to the deepriver platform!!!!").get(), room=None)
     public_rooms = []
     for room_name, room_content in ROOMS.items():
         if ROOMS[room_name]['config']['public'] == True:
